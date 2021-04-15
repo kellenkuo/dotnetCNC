@@ -1,0 +1,64 @@
+{
+  "format": 1,
+  "restore": {
+    "/home/kevin/Documents/CNCTest/CNCTest.csproj": {}
+  },
+  "projects": {
+    "/home/kevin/Documents/CNCTest/CNCTest.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "/home/kevin/Documents/CNCTest/CNCTest.csproj",
+        "projectName": "CNCTest",
+        "projectPath": "/home/kevin/Documents/CNCTest/CNCTest.csproj",
+        "packagesPath": "/home/kevin/.nuget/packages/",
+        "outputPath": "/home/kevin/Documents/CNCTest/obj/",
+        "projectStyle": "PackageReference",
+        "configFilePaths": [
+          "/home/kevin/.nuget/NuGet/NuGet.Config"
+        ],
+        "originalTargetFrameworks": [
+          "netcoreapp3.1"
+        ],
+        "sources": {
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "netcoreapp3.1": {
+            "projectReferences": {}
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        }
+      },
+      "frameworks": {
+        "netcoreapp3.1": {
+          "dependencies": {
+            "InfluxData.Net": {
+              "target": "Package",
+              "version": "[8.0.1, )"
+            }
+          },
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "/snap/dotnet-sdk/117/sdk/3.1.407/RuntimeIdentifierGraph.json"
+        }
+      }
+    }
+  }
+}
