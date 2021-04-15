@@ -48,7 +48,7 @@ namespace CNCTest
             	{
             		
             	}
-            	Thread.Sleep(5000);
+            	Thread.Sleep(100);
             }
 
             CNCInfo.Disconnect();
