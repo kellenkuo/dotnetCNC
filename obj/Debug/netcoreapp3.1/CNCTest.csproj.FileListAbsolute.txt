@@ -63,3 +63,5 @@
 /home/kevin/Documents/CNCTest/bin/Debug/netcoreapp3.1/InfluxData.Net.Kapacitor.dll
 /home/kevin/Documents/CNCTest/bin/Debug/netcoreapp3.1/InfluxData.Net.dll
 /home/kevin/Documents/CNCTest/bin/Debug/netcoreapp3.1/Newtonsoft.Json.dll
+/home/kevin/Documents/CNCTest/bin/Debug/netcoreapp3.1/DotNetEnv.dll
+/home/kevin/Documents/CNCTest/bin/Debug/netcoreapp3.1/Sprache.dll

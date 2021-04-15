@@ -1,11 +1,12 @@
 ﻿using System.Collections.Generic;
 using System.Text.Json;
 using System.Net;
+using System.Threading;
 using System;
 using CNCNetLib;
-// using InfluxData.Net.Common.Enums;
-// using InfluxData.Net.InfluxDb;
-// using InfluxData.Net.InfluxDb.Models;
+using InfluxData.Net.Common.Enums;
+using InfluxData.Net.InfluxDb;
+using InfluxData.Net.InfluxDb.Models;
 
 namespace CNCTest
 {
@@ -13,95 +14,122 @@ namespace CNCTest
     {
         static void Main(string[] args)
         {
+            // .env
+            DotNetEnv.Env.Load();
+            string HOST_IP = DotNetEnv.Env.GetString("HOST_IP");
+            string CNC_IP = DotNetEnv.Env.GetString("CNC_IP");
+            string INFLUX_CONSTR = DotNetEnv.Env.GetString("INFLUXDB_IP") + ":" + DotNetEnv.Env.GetString("INFLUXDB_PORT");
+
             ReturnJson returnJson = new ReturnJson();
 
             CNCInfoClass CNCInfo = new CNCInfoClass();
-            CNCInfo.SetConnectInfo("140.135.107.208", "140.135.106.252", 5000);
+            CNCInfo.SetConnectInfo(HOST_IP, CNC_IP, 5000);
             CNCInfo.Connect();
 
-            for (int i = 0; i < 1; i += 1) {
-                Self(ref CNCInfo, ref returnJson);
+            // while (true) {
+            //     Self(ref CNCInfo, ref returnJson);
+            //     string returnString = JsonSerializer.Serialize( returnJson );
+            //     Send( returnString );
+            // }
+
+            while (true)
+            {
+            	try
+            	{
+            		Self(ref CNCInfo, ref returnJson);
+            		string returnString = JsonSerializer.Serialize( returnJson );
+                    Console.Write( returnString );
+            		Send(INFLUX_CONSTR, ref returnJson);
+            	}
+            	catch
+            	{
+            		
+            	}
+            	Thread.Sleep(5000);
             }
 
             CNCInfo.Disconnect();
-
-            string returnString = JsonSerializer.Serialize( returnJson );
-            Send( returnString );
         }
 
-        static void Send(string returnString)
-        {
-            returnString = returnString.Replace("{","").Replace("}","")
-                .Replace("\"FeedSpindleOvFeed\":","FeedSpindleOvFeed=")
-                .Replace("\"FeedSpindleOvSpindle\":","FeedSpindleOvSpindle=")
-                .Replace("\"FeedSpindleActFeed\":", "FeedSpindleActFeed=")
-                .Replace("\"FeedSpindleActSpindle\":", "FeedSpindleActSpindle=")
-                .Replace("\"ServoLoadAxisCount\":", "ServoLoadAxisCount=")
-                .Replace("\"ServoLoadAxisNr\":", "ServoLoadAxisNr=")
-                .Replace("\"ServoLoadAxisValue\":", "ServoLoadAxisValue=")
-                .Replace("\"SpindleCurrentAxisCount\":", "SpindleCurrentAxisCount=")
-                .Replace("\"SpindleCurrentAxisNr\":", "SpindleCurrentAxisNr=")
-                .Replace("\"SpindleCurrentAxisValue\":", "SpindleCurrentAxisValue=")
-                .Replace("\"WorkingFlag\":", "WorkingFlag=")
-                .Replace("\"AlarmFlag\":", "AlarmFlag=")
-                .Replace("\"NCodeLineNo\":", "NCodeLineNo=")
-                .Replace("\"NCodeContent\":", "NCodeContent=")
-                .Replace("\"NCPointerLineNum\":", "NCPointerLineNum=")
-                .Replace("\"NCPointerMDILineNum\":", "NCPointerMDILineNum=")
-                .Replace("\"PositionAxisName\":", "PositionAxisName=")
-                .Replace("\"PositionCoorMach\":", "PositionCoorMach=")
-                .Replace("\"PositionCoorAbs\":", "PositionCoorAbs=")
-                .Replace("\"PositionCoorRel\":", "PositionCoorRel=")
-                .Replace("\"PositionCoorRes\":", "PositionCoorRes=")
-                .Replace("\"PositionCoorOffset\":", "PositionCoorOffset=")
-                .Replace("\"TotalWorkTime\":", "TotalWorkTime=")
-                .Replace("\"SingleWorkTime\":", "SingleWorkTime=");
-
-            WebClient client = new WebClient();
-            string url = "http://192.168.20.10:8086/write?db=factory";
-            string data = "CNC," + returnString + " value=1.0";
-            Console.WriteLine( returnString.Length );
-            Console.WriteLine( url + " --data-binary " + data );
-            var response = client.UploadString(url, data);
-        }
-
-        // static void SendOld(ref ReturnJson returnJson)
+        // static void Send(string returnString)
         // {
-        //     var dbName = "factory";
-        //     var influxDbClient = new InfluxDbClient("http://192.168.20.10:8086/", "", "", InfluxDbVersion.Latest);
+        //     returnString = returnString.Replace("{","").Replace("}","")
+        //         .Replace("\"FeedSpindleOvFeed\":","FeedSpindleOvFeed=")
+        //         .Replace("\"FeedSpindleOvSpindle\":","FeedSpindleOvSpindle=")
+        //         .Replace("\"FeedSpindleActFeed\":", "FeedSpindleActFeed=")
+        //         .Replace("\"FeedSpindleActSpindle\":", "FeedSpindleActSpindle=")
+        //         .Replace("\"ServoLoadAxisCount\":", "ServoLoadAxisCount=")
+        //         .Replace("\"ServoLoadAxisNr\":", "ServoLoadAxisNr=")
+        //         .Replace("\"ServoLoadAxisValue\":", "ServoLoadAxisValue=")
+        //         .Replace("\"SpindleCurrentAxisCount\":", "SpindleCurrentAxisCount=")
+        //         .Replace("\"SpindleCurrentAxisNr\":", "SpindleCurrentAxisNr=")
+        //         .Replace("\"SpindleCurrentAxisValue\":", "SpindleCurrentAxisValue=")
+        //         .Replace("\"WorkingFlag\":", "WorkingFlag=")
+        //         .Replace("\"AlarmFlag\":", "AlarmFlag=")
+        //         .Replace("\"NCodeLineNo\":", "NCodeLineNo=")
+        //         .Replace("\"NCodeContent\":", "NCodeContent=")
+        //         .Replace("\"NCPointerLineNum\":", "NCPointerLineNum=")
+        //         .Replace("\"NCPointerMDILineNum\":", "NCPointerMDILineNum=")
+        //         .Replace("\"PositionAxisName\":", "PositionAxisName=")
+        //         .Replace("\"PositionCoorMach\":", "PositionCoorMach=")
+        //         .Replace("\"PositionCoorAbs\":", "PositionCoorAbs=")
+        //         .Replace("\"PositionCoorRel\":", "PositionCoorRel=")
+        //         .Replace("\"PositionCoorRes\":", "PositionCoorRes=")
+        //         .Replace("\"PositionCoorOffset\":", "PositionCoorOffset=")
+        //         .Replace("\"TotalWorkTime\":", "TotalWorkTime=")
+        //         .Replace("\"SingleWorkTime\":", "SingleWorkTime=");
 
-        //     var pointToWrite = new Point()
-        //     {
-        //         Name = "CNC", // serie/measurement/table to write into
-        //         Tags = new Dictionary<string, object>()
-        //         {
-        //             { "SerialId", "delta" }
-        //         },
-        //         Fields = new Dictionary<string, object>()
-        //         {
-        //             // {"", string.Join("|", returnJson)}
-        //             {"feedSpindleOvFeed", returnJson.FeedSpindleOvFeed},
-        //             {"feedSpindleOvSpindle", returnJson.FeedSpindleOvSpindle},
-        //             {"feedSpindleActFeed", returnJson.FeedSpindleActFeed},
-        //             {"feedSpindleActSpindle", returnJson.FeedSpindleActSpindle},
-        //             {"servoLoadAxisCount", returnJson.ServoLoadAxisCount},
-        //             {"servoLoadAxisNr", string.Join("|", returnJson.ServoLoadAxisNr)},
-        //             {"servoLoadAxisValue", string.Join("|", returnJson.ServoLoadAxisValue)},
-        //             {"spindleCurrentAxisCount", returnJson.SpindleCurrentAxisCount},
-        //             {"spindleCurrentAxisNr", string.Join("|", returnJson.SpindleCurrentAxisNr)},
-        //             {"spindleCurrentAxisValue", string.Join("|", returnJson.SpindleCurrentAxisValue)},
-        //             {"workingFlag", returnJson.WorkingFlag},
-        //             {"alarmFlag", returnJson.AlarmFlag},
-        //             {"nCodeLineNo", returnJson.NCodeLineNo},
-        //             {"nCodeContent", returnJson.NCodeContent}
-        //             // {"positionAxisName", string.Join("|", returnJson.PositionAxisName)}
-        //             // {"nCPointerLineNum", returnJson.NCPointerLineNum}
-        //             // {"nCPointerMDILineNum", returnJson.NCPointerMDILineNum}
-        //         }
-        //     };
-
-        //     var response = influxDbClient.Client.WriteAsync(pointToWrite, dbName);
+        //     WebClient client = new WebClient();
+        //     string url = "http://140.135.106.215:38086/write?db=factory";
+        //     string data = "CNC," + returnString + " value=1.0";
+        //     Console.WriteLine( returnString.Length );
+        //     Console.WriteLine( url + " --data-binary " + data );
+        //     var response = client.UploadString(url, data);
         // }
+
+        static void Send(string influxConnection, ref ReturnJson returnJson)
+        {
+            var dbName = "factory";
+            var influxDbClient = new InfluxDbClient(influxConnection, "", "", InfluxDbVersion.Latest);
+
+            var pointToWrite = new Point()
+            {
+                Name = "CNC", // serie/measurement/table to write into
+                Tags = new Dictionary<string, object>()
+                {
+                    { "SerialId", "delta" }
+                },
+                Fields = new Dictionary<string, object>()
+                {
+                    {"feedSpindleOvFeed", returnJson.FeedSpindleOvFeed},
+                    {"feedSpindleOvSpindle", returnJson.FeedSpindleOvSpindle},
+                    {"feedSpindleActFeed", returnJson.FeedSpindleActFeed},
+                    {"feedSpindleActSpindle", returnJson.FeedSpindleActSpindle},
+                    {"servoLoadAxisCount", returnJson.ServoLoadAxisCount},
+                    {"servoLoadAxisNr", returnJson.ServoLoadAxisNr},
+                    {"servoLoadAxisValue", returnJson.ServoLoadAxisValue},
+                    {"spindleCurrentAxisCount", returnJson.SpindleCurrentAxisCount},
+                    {"spindleCurrentAxisNr", returnJson.SpindleCurrentAxisNr},
+                    {"spindleCurrentAxisValue", returnJson.SpindleCurrentAxisValue},
+                    {"workingFlag", returnJson.WorkingFlag},
+                    {"alarmFlag", returnJson.AlarmFlag},
+                    {"nCodeLineNo", returnJson.NCodeLineNo},
+                    {"nCodeContent", returnJson.NCodeContent},
+                    {"nCPointerLineNum", returnJson.NCPointerLineNum},
+                    {"nCPointerMDILineNum", returnJson.NCPointerMDILineNum},
+                    {"positionAxisName", returnJson.PositionAxisName},
+                    {"positionCoorMach", returnJson.PositionCoorMach},
+                    {"positionCoorAbs", returnJson.PositionCoorAbs},
+                    {"positionCoorRel", returnJson.PositionCoorRel},
+                    {"positionCoorRes", returnJson.PositionCoorRes},
+                    {"positionCoorOffset", returnJson.PositionCoorOffset},
+                    {"totalWorkTime", returnJson.TotalWorkTime},
+                   	{"singleWorkTime", returnJson.SingleWorkTime}
+                }
+            };
+
+            var response = influxDbClient.Client.WriteAsync(pointToWrite, dbName);
+        }
 
         private class ReturnJson
         {
@@ -192,16 +220,37 @@ namespace CNCTest
         {
             CNCInfo.READ_servo_load(0, out ushort AxisCount, out ushort[] AxisNr, out bool[] Result, out int[] AxisValue);
             returnJson.ServoLoadAxisCount = (int)AxisCount;
-            returnJson.ServoLoadAxisNr = String.Join("|", AxisNr);
-            returnJson.ServoLoadAxisValue = String.Join("|", AxisValue);
+            try {
+            	returnJson.ServoLoadAxisNr = String.Join("|", AxisNr);
+        	}
+        	catch {
+        		returnJson.ServoLoadAxisNr = "";
+        	}
+        	try {
+            	returnJson.ServoLoadAxisValue = String.Join("|", AxisValue);
+        	}
+        	catch {
+        		returnJson.ServoLoadAxisValue = "";
+        	}
         }
 
         static void GetSpindleCurrent(ref CNCInfoClass CNCInfo, ref ReturnJson returnJson)
         {
             CNCInfo.READ_spindle_current(0, out ushort AxisCount, out ushort[] AxisNr, out bool[] Result, out int[] AxisValue);
             returnJson.SpindleCurrentAxisCount = (int)AxisCount;
-            returnJson.SpindleCurrentAxisNr = String.Join("|", AxisNr);
-            returnJson.SpindleCurrentAxisValue = String.Join("|", AxisValue);
+            returnJson.SpindleCurrentAxisNr = "";
+            try {
+                returnJson.SpindleCurrentAxisNr = String.Join("|", AxisNr);
+            }
+            catch {
+            	returnJson.SpindleCurrentAxisNr = "";
+            }
+            try {
+            	returnJson.SpindleCurrentAxisValue = String.Join("|", AxisValue);
+            }
+            catch {
+            	returnJson.SpindleCurrentAxisValue = "";
+            }
         }
 
         static void GetCNCFlag(ref CNCInfoClass CNCInfo, ref ReturnJson returnJson)
@@ -235,29 +284,42 @@ namespace CNCTest
         static void GetPosition(ref CNCInfoClass CNCInfo, ref ReturnJson returnJson)
         {
             CNCInfo.READ_POSITION(0, 0, out string[] AxisName, out double[] CoorMach, out double[] CoorAbs, out double[] CoorRel, out double[] CoorRes,out double[] CoorOffset);
-            returnJson.PositionAxisName = String.Join("|", AxisName);
-            returnJson.PositionCoorMach = String.Join("|", CoorMach);
-            returnJson.PositionCoorAbs = String.Join("|", CoorAbs);
-            returnJson.PositionCoorRel = String.Join("|", CoorRel);
-            returnJson.PositionCoorRes = String.Join("|", CoorRes);
-            returnJson.PositionCoorOffset = String.Join("|", CoorOffset);
-            
-            // int indexLen = AxisName.Length;
-            // returnJson.PositionAxisName = new string[ indexLen ];
-            // returnJson.PositionCoorMach = new string[ indexLen ];
-            // returnJson.PositionCoorAbs = new string[ indexLen ];
-            // returnJson.PositionCoorRel = new string[ indexLen ];
-            // returnJson.PositionCoorRes = new string[ indexLen ];
-            // returnJson.PositionCoorOffset = new string[ indexLen ];
-            // for (int index = 0; index < indexLen; index += 1)
-            // {
-            //     returnJson.PositionAxisName[ index ] = AxisName[ index ];
-            //     returnJson.PositionCoorMach[ index ] = CoorMach[ index ].ToString();
-            //     returnJson.PositionCoorAbs[ index ] = CoorAbs[ index ].ToString();
-            //     returnJson.PositionCoorRel[ index ] = CoorRel[ index ].ToString();
-            //     returnJson.PositionCoorRes[ index ] = CoorRes[ index ].ToString();
-            //     returnJson.PositionCoorOffset[ index ] = CoorOffset[ index ].ToString();
-            // }
+            try {
+            	returnJson.PositionAxisName = String.Join("|", AxisName);
+            }
+            catch {
+            	returnJson.PositionAxisName = "";
+            }
+            try {
+            	returnJson.PositionCoorMach = String.Join("|", CoorMach);
+            }
+            catch {
+            	returnJson.PositionCoorMach = "";
+            }
+            try {
+            	returnJson.PositionCoorAbs = String.Join("|", CoorAbs);
+            }
+            catch {
+            	returnJson.PositionCoorAbs = "";
+            }
+            try {
+            	returnJson.PositionCoorRel = String.Join("|", CoorRel);
+            }
+            catch {
+            	returnJson.PositionCoorRel = "";
+            }
+            try {
+            	returnJson.PositionCoorRes = String.Join("|", CoorRes);
+            }
+            catch {
+            	returnJson.PositionCoorRes = "";
+            }
+            try {
+            	returnJson.PositionCoorOffset = String.Join("|", CoorOffset);
+            }
+            catch {
+            	returnJson.PositionCoorOffset = "";
+            }
         }
 
         static void GetWorkTime(ref CNCInfoClass CNCInfo, ref ReturnJson returnJson)
