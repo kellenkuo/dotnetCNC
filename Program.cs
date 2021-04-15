@@ -17,8 +17,11 @@ namespace CNCTest
             // .env
             DotNetEnv.Env.Load();
             string HOST_IP = DotNetEnv.Env.GetString("HOST_IP");
+            Console.WriteLine("HOSTIP: " + HOST_IP);
             string CNC_IP = DotNetEnv.Env.GetString("CNC_IP");
+            Console.WriteLine("CNC_IP: " + CNC_IP);
             string INFLUX_CONSTR = DotNetEnv.Env.GetString("INFLUXDB_IP") + ":" + DotNetEnv.Env.GetString("INFLUXDB_PORT");
+            Console.WriteLine("INFLUXDB_CONNECTION: " + INFLUX_CONSTR);
 
             ReturnJson returnJson = new ReturnJson();
 
